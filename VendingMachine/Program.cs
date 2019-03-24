@@ -59,11 +59,14 @@ namespace VendingMachine
             else
             {
                 int change = userPaid - itemValue;
-                Console.WriteLine($"User pays {userPaid} for an item that costs {itemValue}. Change to be returned is {change}.");
+                Console.WriteLine($"User pays {userPaid} for an item that costs {itemValue}. Change expected is {change}.");
+                int sum = 0;
                 foreach (var c in coins)
                 {
                     Console.WriteLine($"Coin Denomination: {c.Denomination}. Quantity: {c.Quantity}");
+                    sum += (c.Denomination * c.Quantity);
                 }
+                Console.WriteLine($"Change returned is: {sum}");
             }
             Console.WriteLine("---------------------------------------------");
         }
@@ -146,10 +149,11 @@ namespace VendingMachine
                     //Otherwise take the coin quantity
                     int qty = Math.Min(coin.Quantity, numberOfCoins);
 
-                    List<Coin> matches = new List<Coin>();
+                    //List of coins to be returned
+                    List<Coin> ret = new List<Coin>();
 
                     //Add the denomination and the calculated quantity to a list to return
-                    matches.Add(new Coin(coin.Denomination, qty));
+                    ret.Add(new Coin(coin.Denomination, qty));
 
                     //Calculate if any coin is still needed to be added
                     //If remaining change is 0, meaning all the coins in the list add up to the change, return the list
@@ -157,7 +161,7 @@ namespace VendingMachine
                     int remainingChange = change - (qty * coin.Denomination);
                     if (remainingChange == 0)
                     {
-                        return matches;
+                        return ret;
                     }
 
                     //Recursive call to get small denominations of coin
@@ -167,8 +171,8 @@ namespace VendingMachine
                     //Add the rest of coins to the list and return
                     if (smallerDenominations != null)
                     {
-                        matches.AddRange(smallerDenominations);
-                        return matches;
+                        ret.AddRange(smallerDenominations);
+                        return ret;
                     }                   
                 }
             }
