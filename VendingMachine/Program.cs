@@ -19,6 +19,8 @@ namespace VendingMachine
         {
             //Get vending machine instance using Singleton to ensure there's only 1 vending machine at all time
             var vendingMachine = VendingMachine.Instance;
+
+            //Hover over Coin to see Coin POCO definition
             var coins = new List<Coin>
             {
                 new Coin(5, 50),
@@ -30,14 +32,23 @@ namespace VendingMachine
             //Add coins to the vending machine
             vendingMachine.AddCoins(coins);
 
+            RunExamples(vendingMachine);
+        }
+
+        private static void RunExamples(VendingMachine vendingMachine)
+        {
             var example1 = vendingMachine.GetChangeInCoins(itemValue: 35, userPaid: 50);
             PrettyPrint(example1, itemValue: 35, userPaid: 50);
+
             var example2 = vendingMachine.GetChangeInCoins(itemValue: 15, userPaid: 20);
             PrettyPrint(example2, itemValue: 15, userPaid: 20);
+
             var example3 = vendingMachine.GetChangeInCoins(itemValue: 18, userPaid: 25);
             PrettyPrint(example3, itemValue: 18, userPaid: 25);
+
             var example4 = vendingMachine.GetChangeInCoins(itemValue: 4, userPaid: 10);
             PrettyPrint(example4, itemValue: 4, userPaid: 10);
+
             var example5 = vendingMachine.GetChangeInCoins(itemValue: 31, userPaid: 50);
             PrettyPrint(example5, 31, 50);
         }
@@ -107,7 +118,8 @@ namespace VendingMachine
 
         /// <summary>
         /// This method is an overload of the above method
-        /// It iterates through the list of coins, 
+        /// It iterates through the list of coins, find the appropriate quantity of coins per denomination recursively
+        /// Returns a list of coins equivalent to the change to be given when an item is purchased
         /// </summary>
         /// <returns>The change in coins.</returns>
         /// <param name="coins">Coins.</param>
@@ -127,7 +139,7 @@ namespace VendingMachine
                     //Mod change by the coin denomination to get remainder
                     int rem = change % coin.Denomination;
 
-                    //Get number of coins by that denomination
+                    //Get number of coins for that denomination
                     int numberOfCoins = (change - rem) / coin.Denomination;
 
                     //Take that number of coins if it's less than the coin quantity
@@ -140,7 +152,7 @@ namespace VendingMachine
                     matches.Add(new Coin(coin.Denomination, qty));
 
                     //Calculate if any coin is still needed to be added
-                    //If remaining change is 0, return the list
+                    //If remaining change is 0, meaning all the coins in the list add up to the change, return the list
                     //Otherwise, recursively call this function to get other coins of smaller denominations
                     int remainingChange = change - (qty * coin.Denomination);
                     if (remainingChange == 0)
@@ -149,8 +161,10 @@ namespace VendingMachine
                     }
 
                     //Recursive call to get small denominations of coin
+                    //i + 1 because we want the iteration to start on the next coin
                     List<Coin> smallerDenominations = GetChangeInCoins(coins, remainingChange, i + 1);
 
+                    //Add the rest of coins to the list and return
                     if (smallerDenominations != null)
                     {
                         matches.AddRange(smallerDenominations);
