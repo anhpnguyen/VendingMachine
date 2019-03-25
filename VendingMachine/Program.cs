@@ -25,7 +25,7 @@ namespace VendingMachine
             {
                 new Coin(5, 50),
                 new Coin(1, 100),
-                new Coin(25, 50),
+                new Coin(25, 25),
                 new Coin(10, 50)
             };
 
@@ -49,17 +49,17 @@ namespace VendingMachine
             var example4 = vendingMachine.GetChangeInCoins(itemValue: 4, userPaid: 10);
             PrettyPrint(example4, itemValue: 4, userPaid: 10);
 
-            var example5 = vendingMachine.GetChangeInCoins(itemValue: 31, userPaid: 50);
-            PrettyPrint(example5, 31, 50);
+            var example5 = vendingMachine.GetChangeInCoins(itemValue: 31, userPaid: 5000);
+            PrettyPrint(example5, 31, 5000);
         }
 
         static void PrettyPrint(List<Coin> coins, int itemValue, int userPaid)
         {
+            int change = userPaid - itemValue;
+            Console.WriteLine($"User pays {userPaid} for an item that costs {itemValue}. Change expected is {change}.");
             if (coins == null) Console.WriteLine("Not enough coin.");
             else
             {
-                int change = userPaid - itemValue;
-                Console.WriteLine($"User pays {userPaid} for an item that costs {itemValue}. Change expected is {change}.");
                 int sum = 0;
                 foreach (var c in coins)
                 {
@@ -182,8 +182,9 @@ namespace VendingMachine
                 if (smallerDenominations != null)
                 {
                     ret.AddRange(smallerDenominations);
+                    return ret;
                 }
-                return ret;
+                return null;
             }
 
             return GetChangeInCoins(coins, change, idx + 1);
