@@ -120,66 +120,6 @@ namespace VendingMachine
         }
 
         /// <summary>
-        /// This method is an overload of the above method
-        /// It iterates through the list of coins, find the appropriate quantity of coins per denomination recursively
-        /// Returns a list of coins equivalent to the change to be given when an item is purchased
-        /// </summary>
-        /// <returns>The change in coins.</returns>
-        /// <param name="coins">Coins.</param>
-        /// <param name="change">Change.</param>
-        /// <param name="start">Start.</param>
-        public List<Coin> GetChangeInCoins(List<Coin> coins, int change, int start = 0)
-        {
-            for (int i = start; i < coins.Count; i++)
-            {
-                Coin coin = coins[i];
-                /*
-                 * Check if there's enough coin for a denomination
-                 * and if the denomination is less than the value of change
-                */
-                if (coin.Quantity > 0 && coin.Denomination <= change)
-                {
-                    //Mod change by the coin denomination to get remainder
-                    int rem = change % coin.Denomination;
-
-                    //Get number of coins for that denomination
-                    int numberOfCoins = (change - rem) / coin.Denomination;
-
-                    //Take that number of coins if it's less than the coin quantity
-                    //Otherwise take the coin quantity
-                    int qty = Math.Min(coin.Quantity, numberOfCoins);
-
-                    //List of coins to be returned
-                    List<Coin> ret = new List<Coin>();
-
-                    //Add the denomination and the calculated quantity to a list to return
-                    ret.Add(new Coin(coin.Denomination, qty));
-
-                    //Calculate if any coin is still needed to be added
-                    //If remaining change is 0, meaning all the coins in the list add up to the change, return the list
-                    //Otherwise, recursively call this function to get other coins of smaller denominations
-                    int remainingChange = change - (qty * coin.Denomination);
-                    if (remainingChange == 0)
-                    {
-                        return ret;
-                    }
-
-                    //Recursive call to get small denominations of coin
-                    //i + 1 because we want the iteration to start on the next coin
-                    List<Coin> smallerDenominations = GetChangeInCoins(coins, remainingChange, i + 1);
-
-                    //Add the rest of coins to the list and return
-                    if (smallerDenominations != null)
-                    {
-                        ret.AddRange(smallerDenominations);
-                        return ret;
-                    }                   
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Deposit coins into vending machine
         /// </summary>
         /// <param name="coins">Coins.</param>
@@ -195,5 +135,58 @@ namespace VendingMachine
         private static VendingMachine vendingMachine;
         private VendingMachine() { }
         private List<Coin> Coins = new List<Coin>();
+
+        /// <summary>
+        /// This method is an overload method
+        /// Starting at the first coin, find the appropriate quantity of coins per denomination recursively that adds up to the change
+        /// Returns a list of coins equivalent to the change to be given when an item is purchased
+        /// </summary>
+        /// <returns>The change in coins.</returns>
+        /// <param name="coins">Coins.</param>
+        /// <param name="change">Change.</param>
+        /// <param name="idx">Index.</param>
+        private List<Coin> GetChangeInCoins(List<Coin> coins, int change, int idx = 0)
+        {
+            if (idx == coins.Count) return null;
+
+            Coin coin = coins[idx];
+            /*
+             * Check if there's enough coin for a denomination
+             * and if the denomination is less than the value of change
+            */
+            if (coin.Quantity > 0 && coin.Denomination <= change)
+            {
+                //Get number of coins for that denomination
+                int numberOfCoins = change / coin.Denomination;
+
+                //Compare with available coins and take whichever is less.
+                int qty = Math.Min(coin.Quantity, numberOfCoins);
+
+                //List of coins to be returned
+                List<Coin> ret = new List<Coin>();
+
+                //Add the denomination and the calculated quantity to a list to return
+                ret.Add(new Coin(coin.Denomination, qty));
+
+                //Calculate if any coin is still needed to be added
+                //If remaining change is 0, meaning all the coins in the list add up to the change, return the list
+                //Otherwise, recursively call this function to get other coins of smaller denominations
+                int remainingChange = change - (qty * coin.Denomination);
+                if (remainingChange == 0) return ret;
+
+                //Recursive call to get small denominations of coin
+                //i + 1 because we want the iteration to start on the next coin
+                List<Coin> smallerDenominations = GetChangeInCoins(coins, remainingChange, idx + 1);
+
+                //Add the rest of coins to the list and return
+                if (smallerDenominations != null)
+                {
+                    ret.AddRange(smallerDenominations);
+                }
+                return ret;
+            }
+
+            return GetChangeInCoins(coins, change, idx + 1);
+        }
     }
 }
